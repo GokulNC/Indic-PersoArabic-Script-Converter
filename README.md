@@ -7,7 +7,7 @@ A python library to use the [SANGAM Project's online transliteration](http://san
 ## Usage
 
 ```py
-from sangam.transliteration import convert
+from indo_arabic_transliteration.sangam_api import convert
 convert(text: str, from_script: str, to_script: str)
 ```
 
