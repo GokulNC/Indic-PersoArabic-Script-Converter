@@ -57,3 +57,16 @@ class HindustaniTransliterator:
         text = self.final_urdu_to_hindi_converter.translate(text)
         text = self.urdu_to_hindi_converter.translate(text)
         return text
+
+    def transliterate_from_hindi_to_urdu(self, text):
+        # Assumes no short vowels
+        # TODO: Pre-process to match Urdu Abjad
+        text = self.initial_urdu_to_hindi_converter.reverse_translate(text)
+        text = self.final_urdu_to_hindi_converter.reverse_translate(text)
+        text = self.urdu_to_hindi_converter.reverse_translate(text)
+        return text
+    
+    def __call__(self, text, src_lang, dest_lang):
+        if dest_lang == 'ur':
+            return self.transliterate_from_hindi_to_urdu(text)
+        return self.transliterate_from_urdu_to_hindi(text)
