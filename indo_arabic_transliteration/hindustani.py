@@ -1,9 +1,3 @@
-ARABIC_NORMALIZE_MAP = {
-    'أ': "ا",
-    'ۃ': "ہ",
-}
-arabic_normalizer = str.maketrans(ARABIC_NORMALIZE_MAP)
-
 URDU_POSTPROCESS_MAP = {
     'ڃ': "ںی",
 }
@@ -56,14 +50,9 @@ class HindustaniTransliterator:
 
         from indicnlp.normalize.indic_normalize import IndicNormalizerFactory
         self.urdu_normalizer = IndicNormalizerFactory().get_normalizer('ur')
-
-    def normalize_urdu(self, text):
-        text = self.urdu_normalizer.normalize(text) # Drops short-vowels/diacritics
-        text = text.translate(arabic_normalizer) # Normalize Arabics not handled in UrduHack
-        return text
     
     def transliterate_from_urdu_to_hindi(self, text):
-        text = self.normalize_urdu(text)
+        text = self.urdu_normalizer.normalize(text) # Drops short-vowels/diacritics
         text = self.initial_urdu_to_hindi_converter.translate(text)
         text = self.final_urdu_to_hindi_converter.translate(text)
         text = self.urdu_to_hindi_converter.translate(text)
