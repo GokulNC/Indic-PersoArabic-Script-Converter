@@ -50,6 +50,9 @@ class HindustaniTransliterator:
         self.initial_urdu_to_hindi_converter = StringTranslator(self.initial_urdu_to_hindi_map, match_initial_only=True)
         self.final_urdu_to_hindi_converter = StringTranslator(self.final_urdu_to_hindi_map, match_final_only=True)
         self.urdu_to_hindi_converter = StringTranslator(self.urdu_to_hindi_map)
+        # Monkey patch: Force ह to map only to ہ (not ھ)
+        self.urdu_to_hindi_converter.reverse_translation_dict['ह'] = 'ہ'
+        self.urdu_to_hindi_converter.reverse_translation_dict['ह'+'ा'] = 'ہ'+'ا'
 
         from indicnlp.normalize.indic_normalize import IndicNormalizerFactory
         self.urdu_normalizer = IndicNormalizerFactory().get_normalizer('ur')
