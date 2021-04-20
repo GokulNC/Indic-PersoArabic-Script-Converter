@@ -43,6 +43,9 @@ class HindustaniTransliterator:
                 if 'consonants' in map_file:
                     # Non-initial forms: Consonant+ا to Consonant+ा
                     self.urdu_to_hindi_map[urdu_letter+'ا'] = hindi_letter+'ा'
+                    if len(urdu_letter) == 1:
+                        urdu_shadda, hindi_shadda = urdu_letter+" ّ".strip(), hindi_letter+'्'+hindi_letter
+                        self.urdu_to_hindi_map[urdu_shadda] = hindi_shadda
 
         self.initial_urdu_to_hindi_converter = StringTranslator(self.initial_urdu_to_hindi_map, match_initial_only=True)
         self.final_urdu_to_hindi_converter = StringTranslator(self.final_urdu_to_hindi_map, match_final_only=True)
