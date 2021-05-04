@@ -20,6 +20,8 @@ import re
 import pandas as pd
 from .utils import StringTranslator
 
+from urduhack.normalization.character import remove_diacritics, normalize_characters, normalize_combine_characters
+
 class HindustaniTransliterator:
     def __init__(self):
         data_dir = os.path.dirname(__file__) + '/data/'
@@ -69,10 +71,15 @@ class HindustaniTransliterator:
         self.urdu_to_hindi_converter_pass2.reverse_translation_dict['ह'+'ा'] = 'ہ'+'ا'
 
         from indicnlp.normalize.indic_normalize import IndicNormalizerFactory
-        self.urdu_normalizer = IndicNormalizerFactory().get_normalizer('ur')
+        self.hindi_normalizer = IndicNormalizerFactory().get_normalizer('hi')
+    
+    def urdu_normalize(self, text):
+        text = remove_diacritics(text) # Drops short-vowels
+        text = normalize_combine_characters(normalize_characters(text))
+        return text
     
     def transliterate_from_urdu_to_hindi(self, text, nativize=False):
-        text = self.urdu_normalizer.normalize(text) # Drops short-vowels/diacritics
+        text = self.urdu_normalize(text)
         text = self.urdu_to_hindi_converter_pass1.translate(text)
         text = self.initial_urdu_to_hindi_converter.translate(text)
         text = self.final_urdu_to_hindi_converter.translate(text)
