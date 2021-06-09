@@ -14,6 +14,7 @@ INITIAL_MAP_FILES = ['initial_vowels.csv']
 MAIN_MAP_FILES = ['hindustani_consonants.csv', 'vowels.csv']
 MISC_MAP_FILES = ['numerals.csv', 'punctuations.csv', 'hamza.csv', 'hamza_combo.csv']
 FINAL_MAP_FILES = ['final_vowels.csv']
+ARABIC_MAP_FILES = ['arabic.csv']
 
 import os
 import re
@@ -50,7 +51,15 @@ class HindustaniTransliterator:
             for i in df.columns:
                 urdu_letter, roman_letter, hindi_letter = str(df[i][0]).strip(), str(df[i][1]).strip(), str(df[i][2]).strip()
                 self.final_urdu_to_hindi_map[urdu_letter] = hindi_letter
+                self.urdu_to_hindi_cleanup_pass[urdu_letter] = hindi_letter # Devanagari vowel-marks doesn't work without this
         
+        for map_file in ARABIC_MAP_FILES:
+            df = pd.read_csv(data_dir+map_file, header=None)
+            for i in df.columns:
+                urdu_letter, roman_letter, hindi_letter = str(df[i][0]).strip(), str(df[i][1]).strip(), str(df[i][2]).strip()
+                # TODO: Some of these are initial_only matchers. Handle them
+                self.urdu_to_hindi_cleanup_pass[urdu_letter] = hindi_letter
+
         consonants = []
         for map_file in MAIN_MAP_FILES:
             df = pd.read_csv(data_dir+map_file, header=None)
@@ -100,34 +109,40 @@ class HindustaniTransliterator:
     def urdu_normalize(self, text):
         text = remove_diacritics(text) # Drops short-vowels
         text = normalize_combine_characters(normalize_characters(text))
+        text = text.replace(',', '،').replace('?', '؟').replace('؛', ';').replace('؍', '/').replace('٪', '%')
         return text
     
     def transliterate_from_urdu_to_hindi(self, text, nativize=False):
         text = self.urdu_normalize(text)
-        text = self.urdu_to_hindi_converter_pass1.translate(text)
         text = self.initial_urdu_to_hindi_converter.translate(text)
+        text = self.urdu_to_hindi_converter_pass1.translate(text)
         text = self.final_urdu_to_hindi_converter.translate(text)
         text = self.urdu_to_hindi_converter_pass2.translate(text)
         text = self.urdu_to_hindi_final_cleanup.translate(text)
         text = self.hindi_postprocessor.translate(text) #  (جمہوریہ) जमहवरयह -> जमहोरयह
         text = self.hindi_postprocessor.translate(text) # जमहोरयह -> जमहोरीह
         return text
-
-    def transliterate_from_hindi_to_urdu(self, text, nativize=False):
+    
+    def hindi_normalize(self, text):
         # Assumes no short vowels
         # TODO: Pre-process to match Urdu Abjad
         text = self.hindi_postprocessor.reverse_translate(text)
         text = self.hindi_postprocessor.reverse_translate(text)
-        text = self.urdu_to_hindi_converter_pass1.reverse_translate(text)
+        return text
+
+    def transliterate_from_hindi_to_urdu(self, text, nativize=False):
+        text = self.hindi_normalize(text)
         text = self.initial_urdu_to_hindi_converter.reverse_translate(text)
+        text = self.urdu_to_hindi_converter_pass1.reverse_translate(text)
         text = self.final_urdu_to_hindi_converter.reverse_translate(text)
         text = self.urdu_to_hindi_converter_pass2.reverse_translate(text)
         text = self.urdu_to_hindi_final_cleanup.reverse_translate(text)
+        text = text.replace('ा', 'ا').replace('ी', 'ی').replace('ो', 'و')
         if nativize:
             text = text.translate(urdu_postprocessor)
         return text
     
     def __call__(self, text, src_lang, dest_lang, nativize=False):
         if dest_lang == 'ur':
-            return self.transliterate_from_hindi_to_urdu(text)
-        return self.transliterate_from_urdu_to_hindi(text)
+            return self.transliterate_from_hindi_to_urdu(text, nativize)
+        return self.transliterate_from_urdu_to_hindi(text, nativize)
