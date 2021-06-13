@@ -1,3 +1,10 @@
+import os
+import re
+import pandas as pd
+from .utils import StringTranslator
+
+from urduhack.normalization.character import remove_diacritics, normalize_characters, normalize_combine_characters
+
 URDU_POSTPROCESS_MAP = {
     # Normalizer to modern Urdu
     'ڃ': "ںی",
@@ -6,22 +13,66 @@ URDU_POSTPROCESS_MAP = {
 }
 urdu_postprocessor = str.maketrans(URDU_POSTPROCESS_MAP)
 
-HINDI_TO_URDU_VOWELS_ABJAD = {
-    
+HINDI_ABJAD_MAP = {
+    # Abjadi-purifier
+    'ि': '',
+    'ु': '',
+    'ै': 'े',
+    'ौ': 'ो',
+
+    # Handle non-initial vowels missing in sheet
+    'ई': 'इ',
+    'उ': 'ओ',
+    'ऊ': 'ओ',
+    'ऐ': 'ए',
+    'औ': 'ओ',
 }
+hindi_abjadifier = str.maketrans(HINDI_ABJAD_MAP)
+
+HINDI_INITIAL_VOWELS_ABJADIFY = {
+    'इ': 'अ',
+    'ई': 'ए',
+    'उ': 'अ',
+    'ऊ': 'ओ',
+}
+hindi_initial_vowels_abjadifier = StringTranslator(HINDI_INITIAL_VOWELS_ABJADIFY, match_initial_only=True, support_back_translation=False)
+
+HINDI_PREPROCESS_MAP = {
+
+    # Desanskritize
+    'ँ': 'ं',
+    'ऋ': 'र',
+    'ॠ': 'र',
+    'ऌ': 'ल',
+    'ॡ': 'ल',
+    'ृ': '्र',
+    'ॄ': '्र',
+    'ॢ': '्ल',
+    'ॣ': '्ल',
+
+    'ॺ': 'य़',
+
+    # Dedravidize
+    'ऄ': 'अ',
+    'ऎ': 'ए',
+    'ऒ': 'ओ',
+    'ॆ': 'े',
+    'ॊ': 'ो',
+
+    # Delatinize
+    'ॲ': 'अ',
+    'ऑ': 'आ',
+    'ऍ': 'ए',
+    'ॅ': '',
+    'ॉ': 'ा',
+}
+hindi_preprocessor = StringTranslator(HINDI_PREPROCESS_MAP)
 
 INITIAL_MAP_FILES = ['initial_vowels.csv']
-MAIN_MAP_FILES = ['hindustani_consonants.csv', 'vowels.csv']
-MISC_MAP_FILES = ['numerals.csv', 'punctuations.csv', 'hamza.csv', 'hamza_combo.csv']
+MAIN_MAP_FILES = ['hindustani_consonants.csv', 'vowels.csv', 'hamza.csv']
+MISC_MAP_FILES = ['numerals.csv', 'punctuations.csv', 'hamza_combo.csv']
 FINAL_MAP_FILES = ['final_vowels.csv']
 ARABIC_MAP_FILES = ['arabic.csv']
-
-import os
-import re
-import pandas as pd
-from .utils import StringTranslator
-
-from urduhack.normalization.character import remove_diacritics, normalize_characters, normalize_combine_characters
 
 class HindustaniTransliterator:
     def __init__(self):
@@ -123,21 +174,31 @@ class HindustaniTransliterator:
         text = self.hindi_postprocessor.translate(text) # जमहोरयह -> जमहोरीह
         return text
     
-    def hindi_normalize(self, text):
-        # Assumes no short vowels
-        # TODO: Pre-process to match Urdu Abjad
+    def hindi_normalize(self, text, abjadify_initial_vowels=False, drop_virama=False):
+        text = self.hindi_normalizer.normalize(text)
+        if abjadify_initial_vowels:
+            text = hindi_initial_vowels_abjadifier.translate(text)
+        if drop_virama:
+            text = text.replace('्', '')
+
         text = self.hindi_postprocessor.reverse_translate(text)
         text = self.hindi_postprocessor.reverse_translate(text)
+        text = hindi_preprocessor.translate(text)
+        return text
+    
+    def hindi_remove_short_vowels(self, text):
+        text = text.translate(hindi_abjadifier)
         return text
 
     def transliterate_from_hindi_to_urdu(self, text, nativize=False):
         text = self.hindi_normalize(text)
-        text = self.initial_urdu_to_hindi_converter.reverse_translate(text)
         text = self.urdu_to_hindi_converter_pass1.reverse_translate(text)
+        text = self.hindi_remove_short_vowels(text) # Running it now since previous pass could have handled some short vowels (hamza_combos)
+        text = self.initial_urdu_to_hindi_converter.reverse_translate(text)
         text = self.final_urdu_to_hindi_converter.reverse_translate(text)
         text = self.urdu_to_hindi_converter_pass2.reverse_translate(text)
         text = self.urdu_to_hindi_final_cleanup.reverse_translate(text)
-        text = text.replace('ा', 'ا').replace('ी', 'ی').replace('ो', 'و')
+        text = text.replace('ा', 'ا').replace('ी', 'ی').replace('ो', 'و').replace('े', 'ے')
         if nativize:
             text = text.translate(urdu_postprocessor)
         return text

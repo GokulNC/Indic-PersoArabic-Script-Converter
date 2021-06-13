@@ -7,11 +7,11 @@ from urduhack.normalization.character import remove_diacritics, normalize_charac
 
 URDU_TO_SINDHI = {
     'ی': 'ي',
-    'ے': 'ی',
+    'ے': 'ي',
 }
 sindhi_postprocessor = str.maketrans(URDU_TO_SINDHI)
 
-SINDHI_PREPROCESS = {
+SINDHI_PREPROCESS_MAP = {
     # Lazy people write like these
     ' ء ': ' ۽ ',
     ' م ': ' ۾ ',
@@ -31,11 +31,67 @@ SINDHI_PREPROCESS = {
     # 'پھ': 'ڦ',
     # 'بھ': 'ڀ',
 }
-sindhi_preprocessor = StringTranslator(SINDHI_PREPROCESS)
+sindhi_preprocessor = StringTranslator(SINDHI_PREPROCESS_MAP)
+
+DEVANAGARI_ABJAD_MAP = {
+    # Abjadi-purifier
+    'ि': '',
+    'ु': '',
+    'ै': 'े',
+    'ौ': 'ो',
+
+    # Handle initial vowels missing in sheet
+    'ई': 'इ',
+    'उ': 'ओ',
+    'ऊ': 'ओ',
+    'ऐ': 'ए',
+    'औ': 'ओ',
+}
+devanagari_abjadifier = str.maketrans(DEVANAGARI_ABJAD_MAP)
+
+DEVANAGARI_INITIAL_VOWELS_ABJADIFY = {
+    'इ': 'अ',
+    'ई': 'ए',
+    'उ': 'अ',
+    'ऊ': 'ओ',
+}
+devanagari_initial_vowels_abjadifier = StringTranslator(DEVANAGARI_INITIAL_VOWELS_ABJADIFY, match_initial_only=True, support_back_translation=False)
+
+DEVANAGARI_PREPROCESS_MAP = {
+
+    # Desanskritize
+    'ँ': 'ं',
+    'ऋ': 'र',
+    'ॠ': 'र',
+    'ऌ': 'ल',
+    'ॡ': 'ल',
+    'ृ': '्र',
+    'ॄ': '्र',
+    'ॢ': '्ल',
+    'ॣ': '्ल',
+
+    'ॺ': 'य़',
+
+    # Dedravidize
+    'ऄ': 'अ',
+    'ऎ': 'ए',
+    'ऒ': 'ओ',
+    'ॆ': 'े',
+    'ॊ': 'ो',
+
+    # Delatinize
+    'ॲ': 'अ',
+    'ऑ': 'आ',
+    'ऍ': 'ए',
+    'ॅ': '',
+    'ॉ': 'ा',
+
+}
+devanagari_preprocessor = StringTranslator(DEVANAGARI_PREPROCESS_MAP)
 
 INITIAL_MAP_FILES = ['initial_vowels.csv']
-MAIN_MAP_FILES = ['sindhi_consonants.csv', 'vowels.csv']
-MISC_MAP_FILES = ['numerals.csv', 'punctuations.csv', 'hamza.csv', 'hamza_combo.csv']
+MAIN_MAP_FILES = ['sindhi_consonants.csv', 'vowels.csv', 'hamza.csv']
+MISC_MAP_FILES = ['numerals.csv', 'punctuations.csv', 'hamza_combo.csv']
 FINAL_MAP_FILES = ['final_vowels.csv','sindhi_final_consonants.csv']
 ARABIC_MAP_FILES = ['arabic.csv']
 ISOLATED_MAP_FILES = ['sindhi_isolated.csv']
@@ -132,6 +188,7 @@ class SindhiTransliterator:
         text = remove_diacritics(text) # Drops short-vowels
         text = normalize_combine_characters(normalize_characters(text))
         text = text.replace(',', '،').replace('?', '؟').replace('؛', ';').replace('؍', '/').replace('٪', '%')
+        text = text.replace('ے', 'ی')
         text = sindhi_preprocessor.translate(text)
         text = re.sub(r"ھ\B", "ه", text)
 
@@ -155,24 +212,35 @@ class SindhiTransliterator:
         text = self.devanagari_postprocessor.translate(text) # जमहोरयह -> जमहोरीह
         return text
     
-    def devanagari_normalize(self, text):
-        # Assumes no short vowels
-        # TODO: Pre-process to match Urdu Abjad
+    def devanagari_normalize(self, text, abjadify_initial_vowels=False, drop_virama=False):
+        text = self.devanagari_normalizer.normalize(text)
+        if abjadify_initial_vowels:
+            text = devanagari_initial_vowels_abjadifier.translate(text)
+        if drop_virama:
+            text = text.replace('्', '')
+
         text = self.devanagari_postprocessor.reverse_translate(text)
         text = self.devanagari_postprocessor.reverse_translate(text)
         text = re.sub(r"\sमें\s", " में ", text)
         text = re.sub(r"\sऐं\s", " ऐं ", text)
+
+        text = devanagari_preprocessor.translate(text)
+        return text
+    
+    def devanagari_remove_short_vowels(self, text):
+        text = text.translate(devanagari_abjadifier)
         return text
 
     def transliterate_from_devanagari_to_sindhi(self, text, nativize=False):
         text = self.devanagari_normalize(text)
         text = self.isolated_sindhi_to_devanagari_converter.reverse_translate(text)
-        text = self.initial_sindhi_to_devanagari_converter.reverse_translate(text)
         text = self.sindhi_to_devanagari_converter_pass1.reverse_translate(text)
+        text = self.devanagari_remove_short_vowels(text) # Running it now since previous pass could have handled some short vowels (hamza_combos)
+        text = self.initial_sindhi_to_devanagari_converter.reverse_translate(text)
         text = self.final_sindhi_to_devanagari_converter.reverse_translate(text)
         text = self.sindhi_to_devanagari_converter_pass2.reverse_translate(text)
         text = self.sindhi_to_devanagari_final_cleanup.reverse_translate(text)
-        text = text.replace('ा', 'ا').replace('ी', 'ی').replace('ो', 'و')
+        text = text.replace('ा', 'ا').replace('ी', 'ی').replace('ो', 'و').replace('े', 'ی')
         if nativize:
             text = text.translate(sindhi_postprocessor)
         return text
