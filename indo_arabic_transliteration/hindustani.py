@@ -50,8 +50,6 @@ HINDI_PREPROCESS_MAP = {
     'ॢ': '्ल',
     'ॣ': '्ल',
 
-    'ॺ': 'य़',
-
     # Dedravidize
     'ऄ': 'अ',
     'ऎ': 'ए',
@@ -65,6 +63,10 @@ HINDI_PREPROCESS_MAP = {
     'ऍ': 'ए',
     'ॅ': '',
     'ॉ': 'ा',
+
+    # Misc
+    'ॺ': 'य़',
+    '॰': '.',
 }
 hindi_preprocessor = StringTranslator(HINDI_PREPROCESS_MAP)
 
@@ -125,11 +127,10 @@ class HindustaniTransliterator:
                 if urdu_letter not in {'ی', 'و', 'ھ'}:
                     consonants.append((urdu_letter, roman_letter, hindi_letter))
 
-                if len(urdu_letter) == 1:
-                    urdu_shadda, hindi_shadda = urdu_letter+" ّ".strip(), hindi_letter+'्'+hindi_letter
-                    self.urdu_to_hindi_map_pass1[urdu_shadda] = hindi_shadda
-                    self.urdu_to_hindi_map_pass1[urdu_shadda+'ا'] = hindi_shadda+'ा'
-                    # Note on why it's not in pass-2: پکّا is converted as पक्कअ instead of पक्का (Regex sees shadda char as word boundary?)
+                urdu_shadda, hindi_shadda = urdu_letter+" ّ".strip(), hindi_letter+'्'+hindi_letter
+                self.urdu_to_hindi_map_pass1[urdu_shadda] = hindi_shadda
+                self.urdu_to_hindi_map_pass1[urdu_shadda+'ا'] = hindi_shadda+'ा'
+                # Note on why it's not in pass-2: پکّا is converted as पक्कअ instead of पक्का (Regex sees shadda char as word boundary?)
 
         # Assume medial ی as ी and و as ो
         for i in range(len(consonants)):
@@ -160,6 +161,7 @@ class HindustaniTransliterator:
     def urdu_normalize(self, text):
         text = remove_diacritics(text) # Drops short-vowels
         text = normalize_combine_characters(normalize_characters(text))
+        text = re.sub(r'(\S)\:', r'\1 :', text) # The ':' in (अंग्रेज़ी: English) is seen by regex as 'ः'. Add space before colons
         text = text.replace(',', '،').replace('?', '؟').replace('؛', ';').replace('؍', '/').replace('٪', '%')
         return text
     
@@ -194,11 +196,12 @@ class HindustaniTransliterator:
         text = self.hindi_normalize(text)
         text = self.urdu_to_hindi_converter_pass1.reverse_translate(text)
         text = self.hindi_remove_short_vowels(text) # Running it now since previous pass could have handled some short vowels (hamza_combos)
+        text = text.replace('ा', 'ا') # Regex finds 'ा' as a \b unfortunately. So a quick hack to avoid those confusions
         text = self.initial_urdu_to_hindi_converter.reverse_translate(text)
         text = self.final_urdu_to_hindi_converter.reverse_translate(text)
         text = self.urdu_to_hindi_converter_pass2.reverse_translate(text)
         text = self.urdu_to_hindi_final_cleanup.reverse_translate(text)
-        text = text.replace('ा', 'ا').replace('ी', 'ی').replace('ो', 'و').replace('े', 'ے')
+        text = text.replace('ी', 'ی').replace('ो', 'و').replace('े', 'ے') # In-case anything remains, should never happen tho
         if nativize:
             text = text.translate(urdu_postprocessor)
         return text

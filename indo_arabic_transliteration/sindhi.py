@@ -70,8 +70,6 @@ DEVANAGARI_PREPROCESS_MAP = {
     'ॢ': '्ल',
     'ॣ': '्ल',
 
-    'ॺ': 'य़',
-
     # Dedravidize
     'ऄ': 'अ',
     'ऎ': 'ए',
@@ -85,6 +83,10 @@ DEVANAGARI_PREPROCESS_MAP = {
     'ऍ': 'ए',
     'ॅ': '',
     'ॉ': 'ा',
+
+    # Misc
+    'ॺ': 'य़',
+    '॰': '.',
 
 }
 devanagari_preprocessor = StringTranslator(DEVANAGARI_PREPROCESS_MAP)
@@ -156,11 +158,11 @@ class SindhiTransliterator:
                 if sindhi_letter not in {'ی', 'و', 'ھ'}:
                     consonants.append((sindhi_letter, roman_letter, devanagari_letter))
 
-                if len(sindhi_letter) == 1:
-                    sindhi_shadda, devanagari_shadda = sindhi_letter+" ّ".strip(), devanagari_letter+'्'+devanagari_letter
-                    self.sindhi_to_devanagari_map_pass1[sindhi_shadda] = devanagari_shadda
-                    self.sindhi_to_devanagari_map_pass1[sindhi_shadda+'ا'] = devanagari_shadda+'ा'
-                    # Note on why it's not in pass-2: پکّا is converted as पक्कअ instead of पक्का (Regex sees shadda char as word boundary?)
+                
+                sindhi_shadda, devanagari_shadda = sindhi_letter+" ّ".strip(), devanagari_letter+'्'+devanagari_letter
+                self.sindhi_to_devanagari_map_pass1[sindhi_shadda] = devanagari_shadda
+                self.sindhi_to_devanagari_map_pass1[sindhi_shadda+'ا'] = devanagari_shadda+'ा'
+                # Note on why it's not in pass-2: پکّا is converted as पक्कअ instead of पक्का (Regex sees shadda char as word boundary?)
 
         # Assume medial ی as ी and و as ो
         for i in range(len(consonants)):
@@ -187,10 +189,12 @@ class SindhiTransliterator:
     def sindhi_normalize(self, text):
         text = remove_diacritics(text) # Drops short-vowels
         text = normalize_combine_characters(normalize_characters(text))
+        text = re.sub(r'(\S)\:', r'\1 :', text) # The ':' in (अंग्रेज़ी: English) is seen by regex as 'ः'. Add space before colons
         text = text.replace(',', '،').replace('?', '؟').replace('؛', ';').replace('؍', '/').replace('٪', '%')
         text = text.replace('ے', 'ی')
         text = sindhi_preprocessor.translate(text)
         text = re.sub(r"ھ\B", "ه", text)
+        text = re.sub('([^ڙجگ])ھ', r'\1ه', text) # Except final {گھ, جھ, ڙھ}, all other do-chasmi endings can be converted to Arabic he
 
         # Ensure the isolated characters have space around them
         text = re.sub(r"\s۾\s", " ۾ ", text)
@@ -229,6 +233,7 @@ class SindhiTransliterator:
     
     def devanagari_remove_short_vowels(self, text):
         text = text.translate(devanagari_abjadifier)
+        text = text.replace('े', 'ी')
         return text
 
     def transliterate_from_devanagari_to_sindhi(self, text, nativize=False):
@@ -236,11 +241,12 @@ class SindhiTransliterator:
         text = self.isolated_sindhi_to_devanagari_converter.reverse_translate(text)
         text = self.sindhi_to_devanagari_converter_pass1.reverse_translate(text)
         text = self.devanagari_remove_short_vowels(text) # Running it now since previous pass could have handled some short vowels (hamza_combos)
+        text = text.replace('ा', 'ا') # Regex finds 'ा' as a \b unfortunately. So a quick hack to avoid those confusions
         text = self.initial_sindhi_to_devanagari_converter.reverse_translate(text)
         text = self.final_sindhi_to_devanagari_converter.reverse_translate(text)
         text = self.sindhi_to_devanagari_converter_pass2.reverse_translate(text)
         text = self.sindhi_to_devanagari_final_cleanup.reverse_translate(text)
-        text = text.replace('ा', 'ا').replace('ी', 'ی').replace('ो', 'و').replace('े', 'ی')
+        text = text.replace('ी', 'ی').replace('ो', 'و').replace('े', 'ی') # In-case anything remains, should never happen tho
         if nativize:
             text = text.translate(sindhi_postprocessor)
         return text
