@@ -16,7 +16,7 @@ ENDPOINTS = {
     ('sd-PK', 'sd-IN'): BASE_URL+'SindhiUR2SindhiDEV',
 }
 
-def convert(text: str, from_script: str, to_script: str) -> str:
+def convert(text: str, from_script: str, to_script: str, retry_attempts=5) -> str:
     """Transliterate the given `text` between required scripts.
 
     Args:
@@ -28,8 +28,14 @@ def convert(text: str, from_script: str, to_script: str) -> str:
         str: Transliterated text from SANGAM server
     """
     api_url = ENDPOINTS[(from_script, to_script)]
-    response = requests.post(api_url, json={'input': text})
-    return response.json()['d']
+    for i in range(retry_attempts):
+        try:
+            response = requests.post(api_url, json={'input': text}, timeout=5)
+            return response.json()['d']
+        except requests.exceptions.Timeout:
+            pass
+    
+    raise requests.exceptions.Timeout
 
 if __name__ == '__main__':
     # Test
