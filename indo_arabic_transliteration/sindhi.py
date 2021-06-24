@@ -83,11 +83,20 @@ DEVANAGARI_PREPROCESS_MAP = {
     'ऍ': 'ए',
     'ॅ': '',
     'ॉ': 'ा',
+    'ऩ': 'न',
+    'ऱ': 'र',
+    'ल़': 'ल',
+    'ऴ': 'ळ',
+
+    # De-bangalize
+    'ॺ': 'य',
+    'य़': 'य',
+    'व़': 'व', # W->V
 
     # Misc
-    'ॺ': 'य़',
+    'थ़': 'थ', # https://wiktionary.org/wiki/थ़
+    'म़': 'म',
     '॰': '.',
-
 }
 devanagari_preprocessor = StringTranslator(DEVANAGARI_PREPROCESS_MAP)
 
