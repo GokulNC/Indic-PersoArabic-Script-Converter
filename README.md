@@ -42,13 +42,9 @@ online_transliterate(text: str, from_script: str, to_script: str)
 
 ## Languages
 
-- [Hindi-Urdu](#Hindustani)
-- [Punjabi](#Panjabi)
-- [Sindhi](#Sindhi)
-
 We use the standard [BCP 47 language tags](https://github.com/libyal/libfwnt/wiki/Language-Code-identifiers#0x0400---0x04ff) to refer to the language-script combinations.
 
-### Hindustani
+### Hindi-Urdu (Hindustani)
 
 |Language|Script|Code|
 |--------|------|----|
@@ -122,6 +118,22 @@ Notes & Resources:
   - To convert from Devanagari to the above legacy scripts, use [AksharaMukha](http://aksharamukha.appspot.com/converter)'s python library.
 - You can also use this [JavaScript library](https://github.com/fahadmaqsood/sindhi-transliterator) or [online converter](http://roman.sindhila.edu.pk/).
 - [PersoArabic to Devanagari mapping](https://transliteration.eki.ee/pdf/Sindhi.pdf)
+
+---
+
+## Other Methods
+
+### Model-based Transliteration
+
+- Uses [LibIndicTrans library](https://github.com/libindic/indic-trans)
+  - Install it by `pip install git+https://github.com/libindic/indic-trans`
+- Currently supports only Hindi-Urdu languages
+
+API:  
+```py
+from indo_arabic_transliteration.ml_based import ml_transliterate
+# Same interface as script_convert()
+```
 
 ---
 
