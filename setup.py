@@ -18,7 +18,7 @@ with pathlib.Path('requirements.txt').open() as requirements_txt:
 # This call to setup() does all the work
 setup(
     name="indo-arabic-transliteration",
-    version="0.1.1",
+    version="0.1.2",
     description="Script Conversion for Indo-Pakistani languages",
     long_description=README,
     long_description_content_type="text/markdown",

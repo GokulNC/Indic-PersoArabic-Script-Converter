@@ -123,15 +123,27 @@ Notes & Resources:
 
 ## Other Methods
 
-### Model-based Transliteration
+### MachineLearning-based Transliteration
 
-- Uses [LibIndicTrans library](https://github.com/libindic/indic-trans)
+- Uses [LibIndicTrans library](https://github.com/libindic/indic-trans) for models
   - Install it by `pip install git+https://github.com/libindic/indic-trans`
 - Currently supports only Hindi-Urdu languages
 
 API:  
 ```py
 from indo_arabic_transliteration.ml_based import ml_transliterate
+# Same interface as script_convert()
+```
+
+### Indic-to-Arabic with Diacritics
+
+- Indic scripts are mostly phonetic. Use this to retain diacritics in PersoArabic
+  - Currently only supports Hindi to Urdu
+  - Uses [AksharaMukhi library](https://github.com/virtualvinodh/aksharamukha)
+
+API:  
+```py
+from indo_arabic_transliteration.lossless_converter import convert_with_diacritics
 # Same interface as script_convert()
 ```
 
