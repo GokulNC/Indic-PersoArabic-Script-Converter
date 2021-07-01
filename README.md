@@ -2,15 +2,31 @@
 
 ## Indo-Pakistani Transliteration
 
-A python library to use the [SANGAM Project's online transliteration](http://sangam.learnpunjabi.org/) API, to convert from Indian scripts to Pakistani scripts and vice-versa.
+A python library to convert from Indian scripts to Pakistani scripts and vice-versa.
+
+### Currently supported methods
+
+1. Rule-based direct one-to-one mapping (does not support short vowels)
+  - Use this for simple raw conversion
+  - Will not be accurate, especially for Arabic-to-Indic
+
+2. [SANGAM Project's online transliteration](http://sangam.learnpunjabi.org/) API
+  - Uses an online endpoint for the conversion
+  - Produces much better results, but much slower
 
 ## Usage
 
-### Using rule-based conversion
+### Installation
 
-- Use this for raw conversion.
-- Will not be accurate, especially for Arabic-to-Indic
-  - Because it does direct one-to-one mapping between the scripts
+Pre-requisites:  
+- Use Python 3.7+
+- `pip install git+https://github.com/GokulNC/indic_nlp_library`
+
+```
+pip install indo-arabic-transliteration
+```
+
+### Using rule-based conversion
 
 ```py
 from indo_arabic_transliteration import script_convert
@@ -18,9 +34,6 @@ script_convert(text: str, from_script: str, to_script: str)
 ```
 
 ### Using SANGAM API
-
-- Uses an online API for transliteration
-- Produces much better results, but much slower
 
 ```py
 from indo_arabic_transliteration import online_transliterate
