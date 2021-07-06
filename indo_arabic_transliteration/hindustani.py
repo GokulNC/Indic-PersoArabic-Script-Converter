@@ -7,7 +7,6 @@ from urduhack.normalization.character import remove_diacritics, normalize_charac
 
 URDU_POSTPROCESS_MAP = {
     # Normalizer to modern Urdu
-    'ڃ': "ںی",
     'ݨ': "ن",
     'ࣇ': "ل",
 }
@@ -69,7 +68,6 @@ HINDI_PREPROCESS_MAP = {
     'ऴ': 'ळ',
 
     # De-bangalize
-    'ॺ': 'य',
     'य़': 'य',
     'व़': 'व', # W->V
 

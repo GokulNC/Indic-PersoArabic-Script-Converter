@@ -89,7 +89,6 @@ DEVANAGARI_PREPROCESS_MAP = {
     'ऴ': 'ळ',
 
     # De-bangalize
-    'ॺ': 'य',
     'य़': 'य',
     'व़': 'व', # W->V
 

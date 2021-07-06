@@ -67,9 +67,9 @@ Notes & Resources:
 - Official Tools
   - [Software by Pakistani Center for Language Engineering](https://www.cle.org.pk/software/langproc/h2utransliterator.html)
   - [Online Tool by Indian Center for Development of Advanced Computing](https://gisttransserver.in/)
-- For offline Hindi-Urdu transliteration using Python, use [LibIndic-Trans](https://github.com/libindic/indic-trans).
 - [Devanagari to PersoArabic mapping](https://wikipedia.org/wiki/Hindi-Urdu_transliteration)
-  - Note: This same rule-based function can be used for [Saraiki language](https://en.wikipedia.org/wiki/Saraiki_alphabet#Arabic_script) also
+  - Note: This same rule-based function can be used for [Saraiki](https://en.wikipedia.org/wiki/Saraiki_alphabet#Arabic_script) and [Shina](https://en.wikipedia.org/wiki/Shina_language#Writing) languages also
+    - TODO: Shina characters [here](https://omniglot.com/writing/shina.htm) seems to be bit different. So use with caution
 
 ### Panjabi
 
