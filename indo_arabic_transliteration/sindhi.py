@@ -197,7 +197,6 @@ class SindhiTransliterator:
     def sindhi_normalize(self, text):
         text = remove_diacritics(text) # Drops short-vowels
         text = normalize_combine_characters(normalize_characters(text))
-        text = re.sub(r'(\S)\:', r'\1 :', text) # The ':' in (अंग्रेज़ी: English) is seen by regex as 'ः'. Add space before colons
         text = text.replace(',', '،').replace('?', '؟').replace('؛', ';').replace('؍', '/').replace('٪', '%')
         text = text.replace('ے', 'ی')
         text = sindhi_preprocessor.translate(text)
@@ -205,8 +204,8 @@ class SindhiTransliterator:
         text = re.sub('([^ڙجگ])ھ', r'\1ه', text) # Except final {گھ, جھ, ڙھ}, all other do-chasmi endings can be converted to Arabic he
 
         # Ensure the isolated characters have space around them
-        text = re.sub(r"\s۾\s", " ۾ ", text)
-        text = re.sub(r"\s۽\s", " ۽ ", text)
+        # text = re.sub(" م ", " ۾ ", text)
+        # text = re.sub(" ء ",  " ۽ ", text)
         text = re.sub(r"\s۾([^\w ])", r" ۾ \1", text)
         text = re.sub(r"\s۽([^\w ])", r" ۽ \1", text)
         return text

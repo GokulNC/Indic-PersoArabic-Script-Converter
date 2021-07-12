@@ -169,7 +169,6 @@ class HindustaniTransliterator:
     def urdu_normalize(self, text):
         text = remove_diacritics(text) # Drops short-vowels
         text = normalize_combine_characters(normalize_characters(text))
-        text = re.sub(r'(\S)\:', r'\1 :', text) # The ':' in (अंग्रेज़ी: English) is seen by regex as 'ः'. Add space before colons
         text = text.replace(',', '،').replace('?', '؟').replace('؛', ';').replace('؍', '/').replace('٪', '%')
         return text
     
