@@ -29,7 +29,7 @@ pip install indo-arabic-transliteration
 ### Using rule-based conversion
 
 ```py
-from indo_arabic_transliteration import script_convert
+from indo_arabic_transliteration.mapper import script_convert
 script_convert(text: str, from_script: str, to_script: str)
 ```
 

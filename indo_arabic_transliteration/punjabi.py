@@ -4,8 +4,8 @@ class PunjabiTransliterator(HindustaniTransliterator):
     def __init__(self):
         super().__init__()
 
-        from indicnlp.normalize.indic_normalize import IndicNormalizerFactory
-        self.gurmukhi_normalizer = IndicNormalizerFactory().get_normalizer('pa')
+        from indicnlp.normalize.indic_normalize import GurmukhiNormalizer
+        self.gurmukhi_normalizer = GurmukhiNormalizer()
 
         from aksharamukha.transliterate import process
         self.aksharamukha_xlit = process
