@@ -10,7 +10,7 @@ A python library to convert from Indian scripts to Pakistani scripts and vice-ve
   - Use this for simple raw conversion
   - Will not be accurate, especially for Arabic-to-Indic
 
-2. [SANGAM Project's online transliteration](http://sangam.learnpunjabi.org/) API
+2. [Sangam Project's online transliteration](http://sangam.learnpunjabi.org/) API
   - Uses an online endpoint for the conversion
   - Produces much better results, but much slower
 
@@ -33,10 +33,10 @@ from indo_arabic_transliteration import script_convert
 script_convert(text: str, from_script: str, to_script: str)
 ```
 
-### Using SANGAM API
+### Using Sangam API
 
 ```py
-from indo_arabic_transliteration import online_transliterate
+from indo_arabic_transliteration.sangam_api import online_transliterate
 online_transliterate(text: str, from_script: str, to_script: str)
 ```
 
@@ -117,7 +117,7 @@ Notes & Resources:
 - Before Devanagari standardization, Sindhi was written in Landa scripts like Khojki, Khudawadi, Multani, Gurmukhi, etc. depending upon the region.
   - To convert from Devanagari to the above legacy scripts, use [AksharaMukha](http://aksharamukha.appspot.com/converter)'s python library.
 - You can also use this [JavaScript library](https://github.com/fahadmaqsood/sindhi-transliterator) or [online converter](http://roman.sindhila.edu.pk/).
-- [PersoArabic to Devanagari mapping](https://transliteration.eki.ee/pdf/Sindhi.pdf)
+- [Sindhi-PersoArabic to Devanagari mapping](https://en.wikipedia.org/wiki/Sindhi_transliteration)
 
 ---
 
@@ -152,4 +152,4 @@ from indo_arabic_transliteration.lossless_converter import convert_with_diacriti
 ## Support
 
 - For help in using the library, please use the GitHub Issues section.
-- For script conversion errors from the online API, please write directly to the SANGAM team. We are not related to them in anyway and this is not an official library.
+- For script conversion errors from the online API, please write directly to the Sangam team. We are not related to them in anyway and this is not an official library.

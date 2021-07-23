@@ -1,7 +1,8 @@
 import os
 import re
 import pandas as pd
-from .utils import StringTranslator
+from .str_mapper import StringTranslator
+from .common import devanagari_preprocessor, devanagari_abjadifier, devanagari_initial_vowels_abjadifier
 
 from urduhack.normalization.character import remove_diacritics, normalize_characters, normalize_combine_characters
 
@@ -32,72 +33,6 @@ SINDHI_PREPROCESS_MAP = {
     # 'بھ': 'ڀ',
 }
 sindhi_preprocessor = StringTranslator(SINDHI_PREPROCESS_MAP)
-
-DEVANAGARI_ABJAD_MAP = {
-    # Abjadi-purifier
-    'ि': '',
-    'ु': '',
-    'ै': 'े',
-    'ौ': 'ो',
-
-    # Handle initial vowels missing in sheet
-    'ई': 'इ',
-    'उ': 'ओ',
-    'ऊ': 'ओ',
-    'ऐ': 'ए',
-    'औ': 'ओ',
-}
-devanagari_abjadifier = str.maketrans(DEVANAGARI_ABJAD_MAP)
-
-DEVANAGARI_INITIAL_VOWELS_ABJADIFY = {
-    'इ': 'अ',
-    'ई': 'ए',
-    'उ': 'अ',
-    'ऊ': 'ओ',
-}
-devanagari_initial_vowels_abjadifier = StringTranslator(DEVANAGARI_INITIAL_VOWELS_ABJADIFY, match_initial_only=True, support_back_translation=False)
-
-DEVANAGARI_PREPROCESS_MAP = {
-
-    # Desanskritize
-    'ँ': 'ं',
-    'ऋ': 'र',
-    'ॠ': 'र',
-    'ऌ': 'ल',
-    'ॡ': 'ल',
-    'ृ': '्र',
-    'ॄ': '्र',
-    'ॢ': '्ल',
-    'ॣ': '्ल',
-
-    # Dedravidize
-    'ऄ': 'अ',
-    'ऎ': 'ए',
-    'ऒ': 'ओ',
-    'ॆ': 'े',
-    'ॊ': 'ो',
-
-    # Delatinize
-    'ॲ': 'अ',
-    'ऑ': 'आ',
-    'ऍ': 'ए',
-    'ॅ': '',
-    'ॉ': 'ा',
-    'ऩ': 'न',
-    'ऱ': 'र',
-    'ल़': 'ल',
-    'ऴ': 'ळ',
-
-    # De-bangalize
-    'य़': 'य',
-    'व़': 'व', # W->V
-
-    # Misc
-    'थ़': 'थ', # https://wiktionary.org/wiki/थ़
-    'म़': 'म',
-    '॰': '.',
-}
-devanagari_preprocessor = StringTranslator(DEVANAGARI_PREPROCESS_MAP)
 
 INITIAL_MAP_FILES = ['initial_vowels.csv']
 MAIN_MAP_FILES = ['sindhi_consonants.csv', 'vowels.csv', 'hamza.csv']

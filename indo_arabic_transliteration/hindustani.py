@@ -1,7 +1,8 @@
 import os
 import re
 import pandas as pd
-from .utils import StringTranslator
+from .str_mapper import StringTranslator
+from .common import devanagari_preprocessor, devanagari_abjadifier, devanagari_initial_vowels_abjadifier
 
 from urduhack.normalization.character import remove_diacritics, normalize_characters, normalize_combine_characters
 
@@ -11,72 +12,6 @@ URDU_POSTPROCESS_MAP = {
     'ࣇ': "ل",
 }
 urdu_postprocessor = str.maketrans(URDU_POSTPROCESS_MAP)
-
-HINDI_ABJAD_MAP = {
-    # Abjadi-purifier
-    'ि': '',
-    'ु': '',
-    'ै': 'े',
-    'ौ': 'ो',
-
-    # Handle non-initial vowels missing in sheet
-    'ई': 'इ',
-    'उ': 'ओ',
-    'ऊ': 'ओ',
-    'ऐ': 'ए',
-    'औ': 'ओ',
-}
-hindi_abjadifier = str.maketrans(HINDI_ABJAD_MAP)
-
-HINDI_INITIAL_VOWELS_ABJADIFY = {
-    'इ': 'अ',
-    'ई': 'ए',
-    'उ': 'अ',
-    'ऊ': 'ओ',
-}
-hindi_initial_vowels_abjadifier = StringTranslator(HINDI_INITIAL_VOWELS_ABJADIFY, match_initial_only=True, support_back_translation=False)
-
-HINDI_PREPROCESS_MAP = {
-
-    # Desanskritize
-    'ँ': 'ं',
-    'ऋ': 'र',
-    'ॠ': 'र',
-    'ऌ': 'ल',
-    'ॡ': 'ल',
-    'ृ': '्र',
-    'ॄ': '्र',
-    'ॢ': '्ल',
-    'ॣ': '्ल',
-
-    # Dedravidize
-    'ऄ': 'अ',
-    'ऎ': 'ए',
-    'ऒ': 'ओ',
-    'ॆ': 'े',
-    'ॊ': 'ो',
-
-    # Delatinize
-    'ॲ': 'अ',
-    'ऑ': 'आ',
-    'ऍ': 'ए',
-    'ॅ': '',
-    'ॉ': 'ा',
-    'ऩ': 'न',
-    'ऱ': 'र',
-    'ल़': 'ल',
-    'ऴ': 'ळ',
-
-    # De-bangalize
-    'य़': 'य',
-    'व़': 'व', # W->V
-
-    # Misc
-    'थ़': 'थ', # https://wiktionary.org/wiki/थ़
-    'म़': 'म',
-    '॰': '.',
-}
-hindi_preprocessor = StringTranslator(HINDI_PREPROCESS_MAP)
 
 INITIAL_MAP_FILES = ['initial_vowels.csv']
 MAIN_MAP_FILES = ['hindustani_consonants.csv', 'vowels.csv', 'hamza.csv']
@@ -186,17 +121,17 @@ class HindustaniTransliterator:
     def hindi_normalize(self, text, abjadify_initial_vowels=False, drop_virama=False):
         text = self.hindi_normalizer.normalize(text)
         if abjadify_initial_vowels:
-            text = hindi_initial_vowels_abjadifier.translate(text)
+            text = devanagari_initial_vowels_abjadifier.translate(text)
         if drop_virama:
             text = text.replace('्', '')
 
         text = self.hindi_postprocessor.reverse_translate(text)
         text = self.hindi_postprocessor.reverse_translate(text)
-        text = hindi_preprocessor.translate(text)
+        text = devanagari_preprocessor.translate(text)
         return text
     
     def hindi_remove_short_vowels(self, text):
-        text = text.translate(hindi_abjadifier)
+        text = text.translate(devanagari_abjadifier)
         return text
 
     def transliterate_from_hindi_to_urdu(self, text, nativize=False):

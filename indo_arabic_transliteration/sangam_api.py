@@ -16,7 +16,7 @@ ENDPOINTS = {
     ('sd-PK', 'sd-IN'): BASE_URL+'SindhiUR2SindhiDEV',
 }
 
-def convert(text: str, from_script: str, to_script: str, retry_attempts=5) -> str:
+def online_transliterate(text: str, from_script: str, to_script: str, retry_attempts=5) -> str:
     """Transliterate the given `text` between required scripts.
 
     Args:
