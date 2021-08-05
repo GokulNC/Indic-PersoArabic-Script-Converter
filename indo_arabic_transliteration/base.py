@@ -121,7 +121,7 @@ class BaseIndoArabicTransliterator:
 
         # Improper hamzas
         text = text.replace("اے", "ائے")
-        text = text.replace("یے", "ئے")
+        text = re.sub("(\B)یے", r"\1ئے", text)
         return text
     
     def devanagari_normalize(self, text, abjadify_initial_vowels=True, drop_virama=False):
