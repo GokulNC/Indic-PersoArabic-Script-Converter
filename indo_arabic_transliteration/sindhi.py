@@ -32,7 +32,7 @@ SINDHI_PREPROCESS_MAP = {
 sindhi_preprocessor = StringTranslator(SINDHI_PREPROCESS_MAP)
 
 CONSONANT_MAP_FILES = ['sindhi_consonants.csv']
-ADDITIONAL_FINAL_MAP_FILES = ['sindhi_final_consonants.csv']
+ADDITIONAL_FINAL_MAP_FILES = ['sindhi_final.csv']
 ISOLATED_MAP_FILES = ['sindhi_isolated.csv']
 
 class SindhiTransliterator(BaseIndoArabicTransliterator):
@@ -75,6 +75,11 @@ class SindhiTransliterator(BaseIndoArabicTransliterator):
         text = self.arabic_normalize(text)
         text = self.isolated_sindhi_to_devanagari_converter.translate(text)
         text = self.initial_arabic_to_devanagari_converter.translate(text)
+
+        # Convert Hamza-combos first, then remaining hamza
+        text = self.hamza_combo_to_devanagari_converter.translate(text)
+        text = self.hamza_to_devanagari_converter.translate(text)
+
         text = self.arabic_to_devanagari_converter_pass1.translate(text)
         text = self.final_arabic_to_devanagari_converter.translate(text)
         text = text.replace('ھ', 'ه') # Now convert Urdu do-chashmi he into Arabic he
@@ -99,7 +104,13 @@ class SindhiTransliterator(BaseIndoArabicTransliterator):
 
     def transliterate_from_devanagari_to_sindhi(self, text, nativize=False):
         text = self.devanagari_normalize(text)
+        text = re.sub('((^|[^\u0900-\u0963\u0972-\u097f]))ए', '\\1ای', text) # Patch: ए is present in both hamza and initial vowels, so handle first
         text = self.isolated_sindhi_to_devanagari_converter.reverse_translate(text)
+
+        # Convert Devanagari-Hamza first, then hamza-combos
+        text = self.hamza_to_devanagari_converter.reverse_translate(text)
+        text = self.hamza_combo_to_devanagari_converter.reverse_translate(text)
+
         text = self.arabic_to_devanagari_converter_pass1.reverse_translate(text)
         text = self.devanagari_remove_short_vowels(text) # Running it now since previous pass could have handled some short vowels (hamza_combos)
         text = text.replace('ा', 'ا') # Regex finds 'ा' as a \b unfortunately. So a quick hack to avoid those confusions

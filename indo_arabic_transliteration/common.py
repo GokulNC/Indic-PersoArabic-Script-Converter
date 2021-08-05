@@ -52,7 +52,6 @@ DEVANAGARI_ABJAD_MAP = {
     'ौ': 'ो',
 
     # Handle non-initial vowels missing in sheet
-    'ई': 'इ',
     'उ': 'ओ',
     'ऊ': 'ओ',
     'ऐ': 'ए',

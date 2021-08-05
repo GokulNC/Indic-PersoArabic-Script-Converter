@@ -7,10 +7,13 @@ from .common import devanagari_preprocessor, devanagari_abjadifier, devanagari_i
 from urduhack.normalization.character import remove_diacritics, normalize_characters, normalize_combine_characters
 
 INITIAL_MAP_FILES = ['initial_vowels.csv']
-MAIN_MAP_FILES = ['vowels.csv', 'hamza.csv']
-MISC_MAP_FILES = ['numerals.csv', 'punctuations.csv', 'hamza_combo.csv']
+MAIN_MAP_FILES = ['vowels.csv']
+MISC_MAP_FILES = ['numerals.csv', 'punctuations.csv']
 FINAL_MAP_FILES = ['final_vowels.csv']
 ARABIC_MAP_FILES = ['arabic.csv']
+
+HAMZA_FILES = ['hamza.csv']
+HAMZA_COMBO_FILES = ['hamza_combo.csv']
 
 class BaseIndoArabicTransliterator:
     '''
@@ -23,6 +26,8 @@ class BaseIndoArabicTransliterator:
         self.arabic_to_devanagari_map_pass1 = {}
         self.arabic_to_devanagari_map_pass2 = {}
         self.arabic_to_devanagari_cleanup_pass = {} # To handle chars at erraneous/unconventional places
+        self.hamza_to_devanagari_map = {}
+        self.hamza_combo_to_devanagari_map = {}
         self.devanagari_postprocess_map = {}
 
         for map_file in MISC_MAP_FILES:
@@ -51,6 +56,18 @@ class BaseIndoArabicTransliterator:
                 arabic_letter, roman_letter, devanagari_letter = str(df[i][0]).strip(), str(df[i][1]).strip(), str(df[i][2]).strip()
                 # TODO: Some of these are initial_only matchers. Handle them
                 self.arabic_to_devanagari_cleanup_pass[arabic_letter] = devanagari_letter
+        
+        for map_file in HAMZA_FILES:
+            df = pd.read_csv(data_dir+map_file, header=None)
+            for i in df.columns:
+                arabic_letter, roman_letter, devanagari_letter = str(df[i][0]).strip(), str(df[i][1]).strip(), str(df[i][2]).strip()
+                self.hamza_to_devanagari_map[arabic_letter] = devanagari_letter
+        
+        for map_file in HAMZA_COMBO_FILES:
+            df = pd.read_csv(data_dir+map_file, header=None)
+            for i in df.columns:
+                arabic_letter, roman_letter, devanagari_letter = str(df[i][0]).strip(), str(df[i][1]).strip(), str(df[i][2]).strip()
+                self.hamza_combo_to_devanagari_map[arabic_letter] = devanagari_letter
 
         for map_file in MAIN_MAP_FILES:
             df = pd.read_csv(data_dir+map_file, header=None)
@@ -90,6 +107,8 @@ class BaseIndoArabicTransliterator:
         self.arabic_to_devanagari_converter_pass1 = StringTranslator(self.arabic_to_devanagari_map_pass1)
         self.arabic_to_devanagari_converter_pass2 = StringTranslator(self.arabic_to_devanagari_map_pass2)
         self.arabic_to_devanagari_final_cleanup = StringTranslator(self.arabic_to_devanagari_cleanup_pass)
+        self.hamza_to_devanagari_converter = StringTranslator(self.hamza_to_devanagari_map)
+        self.hamza_combo_to_devanagari_converter = StringTranslator(self.hamza_combo_to_devanagari_map)
         self.devanagari_postprocessor = StringTranslator(self.devanagari_postprocess_map)
 
         from indicnlp.normalize.indic_normalize import DevanagariNormalizer
@@ -99,6 +118,10 @@ class BaseIndoArabicTransliterator:
         text = remove_diacritics(text) # Drops short-vowels
         text = normalize_combine_characters(normalize_characters(text))
         text = text.replace(',', '،').replace('?', '؟').replace('؛', ';').replace('؍', '/').replace('٪', '%')
+
+        # Improper hamzas
+        text = text.replace("اے", "ائے")
+        text = text.replace("یے", "ئے")
         return text
     
     def devanagari_normalize(self, text, abjadify_initial_vowels=False, drop_virama=False):
