@@ -2,7 +2,7 @@ import os
 import re
 import pandas as pd
 from .str_mapper import StringTranslator
-from .common import devanagari_preprocessor, devanagari_abjadifier, devanagari_initial_vowels_abjadifier, devanagari_nuqta_consonants_simplifier
+from .common import devanagari_preprocessor, devanagari_abjadifier, devanagari_initial_vowels_abjadify, devanagari_nuqta_consonants_simplifier, devanagari_non_initial_independent_vowels_abjadifier
 
 from urduhack.normalization.character import remove_diacritics, normalize_characters, normalize_combine_characters
 
@@ -124,13 +124,14 @@ class BaseIndoArabicTransliterator:
         text = text.replace("یے", "ئے")
         return text
     
-    def devanagari_normalize(self, text, abjadify_initial_vowels=False, drop_virama=False):
+    def devanagari_normalize(self, text, abjadify_initial_vowels=True, drop_virama=False):
         text = self.devanagari_normalizer.normalize(text)
         if abjadify_initial_vowels:
-            text = devanagari_initial_vowels_abjadifier.translate(text)
+            text = devanagari_initial_vowels_abjadify(text)
         if drop_virama:
             text = text.replace('्', '')
 
+        text = text.translate(devanagari_non_initial_independent_vowels_abjadifier)
         text = self.devanagari_postprocessor.reverse_translate(text)
         text = self.devanagari_postprocessor.reverse_translate(text)
         text = devanagari_preprocessor.translate(text)

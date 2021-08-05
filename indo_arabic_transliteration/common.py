@@ -1,3 +1,4 @@
+import re
 from .str_mapper import StringTranslator
 
 DEVANAGARI_PREPROCESS_MAP = {
@@ -50,14 +51,17 @@ DEVANAGARI_ABJAD_MAP = {
     'ु': '',
     'ै': 'े',
     'ौ': 'ो',
-
-    # Handle non-initial vowels missing in sheet
-    'उ': 'ओ',
-    'ऊ': 'ओ',
-    'ऐ': 'ए',
-    'औ': 'ओ',
 }
 devanagari_abjadifier = str.maketrans(DEVANAGARI_ABJAD_MAP)
+
+DEVANAGARI_NON_INITIAL_INDEPENDENT_VOWELS_ABJADIFY = {
+    # Handle non-initial vowels missing in sheet
+    'उ': 'ओ़',
+    'ऊ': 'ओ़',
+    'ऐ': 'ए',
+    'औ': 'ओ़',
+}
+devanagari_non_initial_independent_vowels_abjadifier = str.maketrans(DEVANAGARI_NON_INITIAL_INDEPENDENT_VOWELS_ABJADIFY)
 
 DEVANAGARI_INITIAL_VOWELS_ABJADIFY = {
     'इ': 'अ',
@@ -68,6 +72,16 @@ DEVANAGARI_INITIAL_VOWELS_ABJADIFY = {
     'औ': 'ओ',
 }
 devanagari_initial_vowels_abjadifier = StringTranslator(DEVANAGARI_INITIAL_VOWELS_ABJADIFY, match_initial_only=True, support_back_translation=False)
+
+def devanagari_initial_vowels_abjadify(text):
+    # TODO: Handle in a generalized way
+    text = re.sub('((^|[^\u0900-\u0963\u0972-\u097f]))इ', '\\1अ', text)
+    text = re.sub('((^|[^\u0900-\u0963\u0972-\u097f]))ई', '\\1ए', text)
+    text = re.sub('((^|[^\u0900-\u0963\u0972-\u097f]))उ', '\\1अ', text)
+    text = re.sub('((^|[^\u0900-\u0963\u0972-\u097f]))ऊ', '\\1ओ', text)
+    text = re.sub('((^|[^\u0900-\u0963\u0972-\u097f]))ऐ', '\\1ए', text)
+    text = re.sub('((^|[^\u0900-\u0963\u0972-\u097f]))औ', '\\1ओ', text)
+    return text
 
 DEVANAGARI_NUQTA_CONSONANTS_SIMPLIFY_MAP = {
     # Unicode chars
