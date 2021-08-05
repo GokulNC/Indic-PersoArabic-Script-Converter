@@ -82,6 +82,8 @@ class SindhiTransliterator(BaseIndoArabicTransliterator):
         text = self.arabic_to_devanagari_final_cleanup.translate(text)
         text = self.devanagari_postprocessor.translate(text) #  (جمهوریه) जमहवरयह -> जमहोरयह
         text = self.devanagari_postprocessor.translate(text) # जमहोरयह -> जमहोरीह
+        if nativize:
+            text = self.devanagari_nativize(text)
         return text
     
     def devanagari_normalize(self, text, abjadify_initial_vowels=False, drop_virama=False):

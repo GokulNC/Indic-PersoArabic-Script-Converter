@@ -69,3 +69,31 @@ DEVANAGARI_INITIAL_VOWELS_ABJADIFY = {
     'औ': 'ओ',
 }
 devanagari_initial_vowels_abjadifier = StringTranslator(DEVANAGARI_INITIAL_VOWELS_ABJADIFY, match_initial_only=True, support_back_translation=False)
+
+DEVANAGARI_NUQTA_CONSONANTS_SIMPLIFY_MAP = {
+    # Unicode chars
+    'क़': 'क',
+    'ख़': 'ख',
+    'ग़': 'ग',
+    # 'ज़': 'ज',
+    'ड़': 'ड',
+    'ढ़': 'ढ',
+    'फ़': 'फ',
+
+    # Constructed chars
+    'ज़़': 'ज़',
+    'ॹ': 'ज़',
+    'ॹ़': 'ज़',
+    'त़': 'त',
+    'स़': 'स',
+    'स़़': 'स',
+    'ह़': 'ह',
+    'ह॒': 'ह',
+
+    # Implosive to germination (approx)
+    'ॻ': 'ग्ग',
+    'ॼ': 'ज्ज',
+    'ॾ': 'ड्ड',
+    'ॿ': 'ब्ब',
+}
+devanagari_nuqta_consonants_simplifier = StringTranslator(DEVANAGARI_NUQTA_CONSONANTS_SIMPLIFY_MAP, support_back_translation=False)

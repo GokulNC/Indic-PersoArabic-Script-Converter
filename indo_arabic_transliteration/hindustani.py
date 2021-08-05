@@ -37,6 +37,8 @@ class HindustaniTransliterator(BaseIndoArabicTransliterator):
         text = self.arabic_to_devanagari_final_cleanup.translate(text)
         text = self.devanagari_postprocessor.translate(text) #  (جمہوریہ) जमहवरयह -> जमहोरयह
         text = self.devanagari_postprocessor.translate(text) # जमहोरयह -> जमहोरीह
+        if nativize:
+            text = self.devanagari_nativize(text)
         return text
 
     def transliterate_from_hindi_to_urdu(self, text, nativize=False):

@@ -2,7 +2,7 @@ import os
 import re
 import pandas as pd
 from .str_mapper import StringTranslator
-from .common import devanagari_preprocessor, devanagari_abjadifier, devanagari_initial_vowels_abjadifier
+from .common import devanagari_preprocessor, devanagari_abjadifier, devanagari_initial_vowels_abjadifier, devanagari_nuqta_consonants_simplifier
 
 from urduhack.normalization.character import remove_diacritics, normalize_characters, normalize_combine_characters
 
@@ -117,3 +117,6 @@ class BaseIndoArabicTransliterator:
         text = text.translate(devanagari_abjadifier)
         text = re.sub("े([\u0900-\u0963\u0972-\u097f])", "ी\\1", text) # bari ye can be only in final position
         return text
+
+    def devanagari_nativize(self, text):
+        return devanagari_nuqta_consonants_simplifier.translate(text)
