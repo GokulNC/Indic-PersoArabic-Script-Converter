@@ -1,4 +1,5 @@
 import os
+import re
 import pandas as pd
 from .str_mapper import StringTranslator
 from .common import devanagari_preprocessor, devanagari_abjadifier, devanagari_initial_vowels_abjadifier
@@ -114,4 +115,5 @@ class BaseIndoArabicTransliterator:
     
     def devanagari_remove_short_vowels(self, text):
         text = text.translate(devanagari_abjadifier)
+        text = re.sub("े([\u0900-\u0963\u0972-\u097f])", "ी\\1", text) # bari ye can be only in final position
         return text

@@ -1,4 +1,5 @@
 from .base import BaseIndoArabicTransliterator
+import re
 
 URDU_POSTPROCESS_MAP = {
     # Normalizer to modern Urdu
@@ -19,8 +20,16 @@ class HindustaniTransliterator(BaseIndoArabicTransliterator):
         self.arabic_to_devanagari_converter_pass1.reverse_translation_dict['ह्ह'] = 'ہّ'
         self.arabic_to_devanagari_converter_pass1.reverse_translation_dict['ह्ह'+'ा'] = 'ہّ'+'ا'
     
+    def transliterate_ambiguous_urdu_words_to_hindi(self, text):
+        # TODO: Handle these using mapper
+        text = re.sub(r"(\b)و(\b)", "\\1व\\2", text)
+        text = re.sub(r"(\b)میں(\b)", "\\1में\\2", text)
+        text = re.sub(r"(\b)ہیں(\b)", "\\1हें\\2", text)
+        return text
+    
     def transliterate_from_urdu_to_hindi(self, text, nativize=False):
         text = self.arabic_normalize(text)
+        text = self.transliterate_ambiguous_urdu_words_to_hindi(text)
         text = self.initial_arabic_to_devanagari_converter.translate(text)
         text = self.arabic_to_devanagari_converter_pass1.translate(text)
         text = self.final_arabic_to_devanagari_converter.translate(text)
