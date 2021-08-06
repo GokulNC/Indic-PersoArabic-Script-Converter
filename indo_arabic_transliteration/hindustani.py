@@ -57,11 +57,13 @@ class HindustaniTransliterator(BaseIndoArabicTransliterator):
         text = self.arabic_to_devanagari_converter_pass1.reverse_translate(text)
         text = self.devanagari_remove_short_vowels(text) # Running it now since previous pass could have handled some short vowels (hamza_combos)
         text = text.replace('ा', 'ا') # Regex finds 'ा' as a \b unfortunately. So a quick hack to avoid those confusions
-        text = self.initial_arabic_to_devanagari_converter.reverse_translate(text)
         text = self.final_arabic_to_devanagari_converter.reverse_translate(text)
+        text = text.replace('ी', 'ی').replace('ो', 'و').replace('े', 'ے') # In-case anything remains, should never happen tho
+        text = self.initial_arabic_to_devanagari_converter.reverse_translate(text)
+        text = text.replace("ओ", "ؤ")
         text = self.arabic_to_devanagari_converter_pass2.reverse_translate(text)
         text = self.arabic_to_devanagari_final_cleanup.reverse_translate(text)
-        text = text.replace('ी', 'ی').replace('ो', 'و').replace('े', 'ے') # In-case anything remains, should never happen tho
+        
         if nativize:
             text = text.translate(urdu_postprocessor)
         return text

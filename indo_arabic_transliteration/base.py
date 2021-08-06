@@ -2,7 +2,7 @@ import os
 import re
 import pandas as pd
 from .str_mapper import StringTranslator
-from .common import devanagari_preprocessor, devanagari_abjadifier, devanagari_initial_vowels_abjadify, devanagari_nuqta_consonants_simplifier, devanagari_non_initial_independent_vowels_abjadifier
+from .common import devanagari_preprocessor, devanagari_short_vowels_remover, devanagari_initial_vowels_abjadify, devanagari_nuqta_consonants_simplifier, devanagari_non_initial_vowels_abjadifier
 
 from urduhack.normalization.character import remove_diacritics, normalize_characters, normalize_combine_characters
 
@@ -122,6 +122,9 @@ class BaseIndoArabicTransliterator:
         # Improper hamzas
         text = text.replace("اے", "ائے")
         text = re.sub("(\B)یے", r"\1ئے", text)
+
+        # If word starts with hamza, mostly an spacing error. Remove space
+        text = re.sub('\s([ۓؤئ])', '\\1', text)
         return text
     
     def devanagari_normalize(self, text, abjadify_initial_vowels=True, drop_virama=False):
@@ -131,14 +134,14 @@ class BaseIndoArabicTransliterator:
         if drop_virama:
             text = text.replace('्', '')
 
-        text = text.translate(devanagari_non_initial_independent_vowels_abjadifier)
+        text = text.translate(devanagari_non_initial_vowels_abjadifier)
         text = self.devanagari_postprocessor.reverse_translate(text)
         text = self.devanagari_postprocessor.reverse_translate(text)
         text = devanagari_preprocessor.translate(text)
         return text
     
     def devanagari_remove_short_vowels(self, text):
-        text = text.translate(devanagari_abjadifier)
+        text = text.translate(devanagari_short_vowels_remover)
         text = re.sub("े([\u0900-\u0963\u0972-\u097f])", "ी\\1", text) # bari ye can be only in final position
         return text
 

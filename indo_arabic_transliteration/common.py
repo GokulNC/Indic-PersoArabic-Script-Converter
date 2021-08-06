@@ -45,23 +45,24 @@ DEVANAGARI_PREPROCESS_MAP = {
 }
 devanagari_preprocessor = StringTranslator(DEVANAGARI_PREPROCESS_MAP)
 
-DEVANAGARI_ABJAD_MAP = {
+DEVANAGARI_SHORT_VOWELS_REMOVE_MAP = {
     # Abjadi-purifier
     'ि': '',
     'ु': '',
+}
+devanagari_short_vowels_remover = str.maketrans(DEVANAGARI_SHORT_VOWELS_REMOVE_MAP)
+
+DEVANAGARI_NON_INITIAL_VOWELS_ABJADIFY = {
     'ै': 'े',
     'ौ': 'ो',
-}
-devanagari_abjadifier = str.maketrans(DEVANAGARI_ABJAD_MAP)
 
-DEVANAGARI_NON_INITIAL_INDEPENDENT_VOWELS_ABJADIFY = {
     # Handle non-initial vowels missing in sheet
-    'उ': 'ओ़',
-    'ऊ': 'ओ़',
+    'उ': 'ओ',
+    'ऊ': 'ओ',
     'ऐ': 'ए',
-    'औ': 'ओ़',
+    'औ': 'ओ',
 }
-devanagari_non_initial_independent_vowels_abjadifier = str.maketrans(DEVANAGARI_NON_INITIAL_INDEPENDENT_VOWELS_ABJADIFY)
+devanagari_non_initial_vowels_abjadifier = str.maketrans(DEVANAGARI_NON_INITIAL_VOWELS_ABJADIFY)
 
 DEVANAGARI_INITIAL_VOWELS_ABJADIFY = {
     'इ': 'अ',
