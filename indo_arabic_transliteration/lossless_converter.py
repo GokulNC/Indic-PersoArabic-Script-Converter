@@ -11,4 +11,7 @@ def convert_with_diacritics(text: str, from_script: str, to_script: str) -> str:
     Returns:
         str: Transliterated text in impure-abjad
     """
-    return aksharamukhi_xlit("Devanagari", "Urdu", text, pre_options=["RemoveSchwaHindi", "AnuChandraEqDeva"]) #, nativize=False)
+    if from_script == 'hi-IN' and to_script == 'ur-PK':
+        return aksharamukhi_xlit("Devanagari", "Shahmukhi", text, pre_options=["RemoveSchwaHindi", "AnuChandraEqDeva"]) #, nativize=False)
+    if from_script == 'pa-IN' and to_script == 'pa-PK':
+        return aksharamukhi_xlit("Gurmukhi", "Shahmukhi", text, pre_options=["SchwaFinalGurmukhi"]) #, nativize=False)

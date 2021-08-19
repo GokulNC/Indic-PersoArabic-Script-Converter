@@ -6,8 +6,8 @@ A python library to convert from Indian scripts to Pakistani scripts and vice-ve
 
 ### Currently supported methods
 
-1. Rule-based direct one-to-one mapping (does not support short vowels)
-  - Use this for simple raw conversion
+1. Rule-based conversion
+  - Faster, but does not support short vowels
   - Will not be accurate, especially for Arabic-to-Indic
 
 2. [Sangam Project's online transliteration](http://sangam.learnpunjabi.org/) API
@@ -138,7 +138,7 @@ from indo_arabic_transliteration.ml_based import ml_transliterate
 ### Indic-to-Arabic with Diacritics
 
 - Indic scripts are mostly phonetic. Use this to retain diacritics in PersoArabic
-  - Currently only supports Hindi to Urdu
+  - Currently only supports Hindustani (Hindi to Urdu) and Punjabi (Gurmukhi to Shahmukhi)
   - Uses [AksharaMukhi library](https://github.com/virtualvinodh/aksharamukha)
 
 API:  
