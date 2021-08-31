@@ -15,10 +15,14 @@ with pathlib.Path('requirements.txt').open() as requirements_txt:
         in pkg_resources.parse_requirements(requirements_txt)
     ]
 
-# This call to setup() does all the work
+# Read meta-data
+about = {}
+exec(open('indo_arabic_transliteration/__version.py').read(), about)
+
+# Install
 setup(
     name="indo-arabic-transliteration",
-    version="0.1.4",
+    version=about["__version__"],
     description="Script Conversion for Indo-Pakistani languages",
     long_description=README,
     long_description_content_type="text/markdown",

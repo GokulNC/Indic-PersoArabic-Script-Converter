@@ -55,6 +55,7 @@ devanagari_short_vowels_remover = str.maketrans(DEVANAGARI_SHORT_VOWELS_REMOVE_M
 DEVANAGARI_NON_INITIAL_VOWELS_ABJADIFY = {
     'ै': 'े',
     'ौ': 'ो',
+    'ू': 'ो',
 
     # Handle non-initial vowels missing in sheet
     'उ': 'ओ',
